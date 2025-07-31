@@ -35,7 +35,11 @@ export default function ProfileSection() {
       <div className='flex flex-col'>
         <div className='relative size-28 w-max rounded-full border'>
           <Image
-            src={profile?.profile_image || '/asset/Profile Photo.png'}
+            src={
+              !profile?.profile_image || profile.profile_image.includes('null')
+                ? '/asset/Profile Photo.png'
+                : profile.profile_image
+            }
             alt='Profile Photo'
             width={112}
             height={112}
