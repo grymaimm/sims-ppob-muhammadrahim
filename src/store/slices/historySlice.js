@@ -1,37 +1,49 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async thunk to fetch transaction history
+// Async thunk untuk mendapatkan riwayat transaksi
 export const fetchTransactionHistory = createAsyncThunk(
   'history/fetchTransactionHistory',
-  async (_, { getState, rejectWithValue }) => {
+  async ({ offset = 0, limit = 5 }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
+
       const response = await axios.get(
-        'https://take-home-test-api.nutech-integrasi.com/transaction/history',
+        `${process.env.NEXT_PUBLIC_API_URL}/transaction/history?offset=${offset}&limit=${limit}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
+
       return response.data.data.records;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || 'Failed to fetch transaction history',
-      );
+      const message =
+        error.response?.data?.message || 'Failed to fetch transaction history';
+      return rejectWithValue(message);
     }
   },
 );
 
+// Initial state untuk riwayat transaksi
+const initialState = {
+  records: [],
+  loading: false,
+  error: null,
+};
+
+// Slice riwayat transaksi
 const historySlice = createSlice({
   name: 'history',
-  initialState: {
-    records: [],
-    loading: false,
-    error: null,
+  initialState,
+  reducers: {
+    resetHistory: (state) => {
+      state.records = [];
+      state.loading = false;
+      state.error = null;
+    },
   },
-  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(fetchTransactionHistory.pending, (state) => {
@@ -40,7 +52,12 @@ const historySlice = createSlice({
       })
       .addCase(fetchTransactionHistory.fulfilled, (state, action) => {
         state.loading = false;
-        state.records = action.payload;
+        const newRecords = action.payload;
+
+        state.records =
+          state.records.length > 0
+            ? [...state.records, ...newRecords]
+            : newRecords;
       })
       .addCase(fetchTransactionHistory.rejected, (state, action) => {
         state.loading = false;
@@ -49,4 +66,5 @@ const historySlice = createSlice({
   },
 });
 
+export const { resetHistory } = historySlice.actions;
 export default historySlice.reducer;

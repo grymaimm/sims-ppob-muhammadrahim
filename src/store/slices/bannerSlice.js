@@ -1,29 +1,34 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Async thunk untuk mendapatkan data banner
 export const fetchBanners = createAsyncThunk(
   'banner/fetchBanners',
-  async (_, thunkAPI) => {
+  async (_, { rejectWithValue }) => {
     try {
       const response = await axios.get(
-        'https://take-home-test-api.nutech-integrasi.com/banner',
+        `${process.env.NEXT_PUBLIC_API_URL}/banner`,
       );
       return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response.data.message || 'Failed to fetch banners',
+      return rejectWithValue(
+        error.response?.data?.message || 'Gagal mengambil data banner',
       );
     }
   },
 );
 
+// Initial state untuk banner
+const initialState = {
+  data: [],
+  loading: false,
+  error: null,
+};
+
+// Slice untuk banner
 const bannerSlice = createSlice({
   name: 'banner',
-  initialState: {
-    data: [],
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder

@@ -1,13 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Async thunk untuk melakukan top-up
 export const postTopup = createAsyncThunk(
   'topup/postTopup',
-  async (topupData, { getState, rejectWithValue }) => {
+  async (topupData, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        'https://take-home-test-api.nutech-integrasi.com/topup',
+        `${process.env.NEXT_PUBLIC_API_URL}/topup`,
         topupData,
         {
           headers: {
@@ -17,18 +18,23 @@ export const postTopup = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || error.message);
+      const errorMessage = error.response?.data || error.message;
+      return rejectWithValue(errorMessage);
     }
   },
 );
 
+// Initial state untuk topup
+const initialState = {
+  loading: false,
+  data: null,
+  error: null,
+};
+
+// Slice topup
 const topupSlice = createSlice({
   name: 'topup',
-  initialState: {
-    loading: false,
-    data: null,
-    error: null,
-  },
+  initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder

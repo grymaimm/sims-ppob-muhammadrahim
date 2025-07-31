@@ -1,59 +1,60 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
-// Async Thunks
+// Async thunk untuk mendapatkan data profile
 export const fetchProfile = createAsyncThunk(
   'user/fetchProfile',
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(
-        'https://take-home-test-api.nutech-integrasi.com/profile',
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/profile`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      return data.data;
-    } catch (err) {
-      return rejectWithValue(err.message);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Gagal mengambil data profile',
+      );
     }
   },
 );
 
+// Async thunk untuk mendapatkan data saldo
 export const fetchBalance = createAsyncThunk(
   'user/fetchBalance',
   async (_, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(
-        'https://take-home-test-api.nutech-integrasi.com/balance',
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/balance`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         },
       );
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message);
-      return data.data;
-    } catch (err) {
-      return rejectWithValue(err.message);
+      return response.data.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || 'Gagal mengambil data saldo',
+      );
     }
   },
 );
 
-// UPDATE PROFILE
+// Async thunk untuk memperbarui data profile
 export const updateProfile = createAsyncThunk(
   'user/updateProfile',
-  async (body, thunkAPI) => {
+  async (body, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.put(
-        'https://take-home-test-api.nutech-integrasi.com/profile/update',
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/profile/update`,
         body,
         {
           headers: {
@@ -62,26 +63,26 @@ export const updateProfile = createAsyncThunk(
           },
         },
       );
-      return res.data.data;
+      return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to update profile',
+      return rejectWithValue(
+        error.response?.data?.message || 'Gagal memperbarui data profile',
       );
     }
   },
 );
 
-// UPDATE IMAGE
+// Async thunk untuk memperbarui foto profile
 export const updateProfileImage = createAsyncThunk(
   'user/updateProfileImage',
-  async (file, thunkAPI) => {
+  async (file, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const formData = new FormData();
       formData.append('file', file);
 
-      const res = await axios.put(
-        'https://take-home-test-api.nutech-integrasi.com/profile/image',
+      const response = await axios.put(
+        `${process.env.NEXT_PUBLIC_API_URL}/profile/image`,
         formData,
         {
           headers: {
@@ -90,24 +91,26 @@ export const updateProfileImage = createAsyncThunk(
           },
         },
       );
-      return res.data.data;
+      return response.data.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue(
-        error.response?.data?.message || 'Failed to update profile image',
+      return rejectWithValue(
+        error.response?.data?.message || 'Gagal memperbarui foto profile',
       );
     }
   },
 );
 
-// Slice
+// Initial state untuk user
+const initialState = {
+  profile: null,
+  balance: null,
+  loading: false,
+  error: null,
+};
+
 const userSlice = createSlice({
   name: 'user',
-  initialState: {
-    profile: null,
-    balance: null,
-    loading: false,
-    error: null,
-  },
+  initialState,
   reducers: {
     clearUserState: (state) => {
       state.profile = null;
@@ -117,9 +120,10 @@ const userSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      // Profile
+      // Fetch Profile
       .addCase(fetchProfile.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
         state.loading = false;
@@ -130,9 +134,10 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
 
-      // Balance
+      // Fetch Balance
       .addCase(fetchBalance.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(fetchBalance.fulfilled, (state, action) => {
         state.loading = false;
@@ -143,29 +148,33 @@ const userSlice = createSlice({
         state.error = action.payload;
       })
 
-      // UPDATE
+      // Update Profile
       .addCase(updateProfile.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = { ...state.profile, ...action.payload };
+        state.profile = {
+          ...state.profile,
+          ...action.payload,
+        };
       })
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
 
-      // UPDATE IMAGE
+      // Update Profile Image
       .addCase(updateProfileImage.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(updateProfileImage.fulfilled, (state, action) => {
         state.loading = false;
-        state.profile = {
-          ...state.profile,
-          profile_image: action.payload.profile_image,
-        };
+        if (state.profile) {
+          state.profile.profile_image = action.payload.profile_image;
+        }
       })
       .addCase(updateProfileImage.rejected, (state, action) => {
         state.loading = false;

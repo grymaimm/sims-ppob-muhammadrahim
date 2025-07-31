@@ -1,31 +1,39 @@
-// store/loginSlice.js
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
 
+// Async Thunk untuk login user
 export const loginUser = createAsyncThunk(
   'login/loginUser',
   async (credentials, { rejectWithValue }) => {
     try {
-      const res = await axios.post(
-        'https://take-home-test-api.nutech-integrasi.com/login',
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/login`,
         credentials,
         { headers: { 'Content-Type': 'application/json' } },
       );
-      localStorage.setItem('token', res.data.data.token);
-      return res.data;
-    } catch (err) {
-      return rejectWithValue(err.response?.data || { message: 'Login gagal' });
+
+      const { token } = response.data.data;
+      localStorage.setItem('token', token);
+
+      return response.data;
+    } catch (error) {
+      const message = error.response?.data?.message || 'Login gagal';
+      return rejectWithValue({ message });
     }
   },
 );
 
+// Initial state untuk login
+const initialState = {
+  loading: false,
+  user: null,
+  error: null,
+};
+
+// Slice untuk login
 const loginSlice = createSlice({
   name: 'login',
-  initialState: {
-    loading: false,
-    user: null,
-    error: null,
-  },
+  initialState,
   reducers: {
     logout: (state) => {
       state.user = null;
@@ -46,7 +54,7 @@ const loginSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.user = null;
-        state.error = action.payload.message || 'Terjadi kesalahan';
+        state.error = action.payload.message;
       });
   },
 });
