@@ -1,5 +1,5 @@
 import React from 'react';
-import LoginPage from '@/modules/Auth/components/LoginPage';
+import LoginPage from '@/modules/AuthModules/components/LoginPage';
 
 export default function Home() {
   return (

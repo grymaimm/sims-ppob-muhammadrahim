@@ -5,6 +5,12 @@ import { store } from '@/store';
 import { Toaster } from '@/components/shadcnui/sonner';
 import { useRouter } from 'next/router';
 import { AppLayouts, AuthLayouts } from '@/layouts/AppLayouts';
+import dynamic from 'next/dynamic';
+
+const ProgressBar = dynamic(
+  () => import('@/components/shadcnui/progress-bar'),
+  { ssr: false },
+);
 
 export default function App({ Component, pageProps }) {
   const router = useRouter();
@@ -18,6 +24,7 @@ export default function App({ Component, pageProps }) {
       <StyleGlobals />
       <Provider store={store}>
         <Layouts>
+          <ProgressBar />
           <Component {...pageProps} />
           <Toaster />
         </Layouts>
