@@ -1,19 +1,21 @@
 import { useRouter } from 'next/router';
 import { useSelector, useDispatch } from 'react-redux';
 import { useEffect } from 'react';
-import { resetSelectedService } from '@/store/slices/selectedServiceSlice'; // impor action reset
+
+import { resetSelectedService } from '@/store/slices/selectedServiceSlice';
 import TransactionPayment from './TransactionPayment';
 import TransactionList from './TransactionList';
 
 export default function TransactionModules() {
-  const service = useSelector((state) => state.selectedService);
   const dispatch = useDispatch();
   const router = useRouter();
+  const selectedService = useSelector((state) => state.selectedService);
 
-  // reset saat keluar dari /transaction
+  // Reset selected service jika keluar dari halaman /transaction
   useEffect(() => {
     const handleRouteChange = (url) => {
-      if (!url.startsWith('/transaction')) {
+      const isTransactionRoute = url.startsWith('/transaction');
+      if (!isTransactionRoute) {
         dispatch(resetSelectedService());
       }
     };
@@ -26,7 +28,11 @@ export default function TransactionModules() {
 
   return (
     <div className='flex w-full flex-col px-6'>
-      {service ? <TransactionPayment service={service} /> : <TransactionList />}
+      {selectedService ? (
+        <TransactionPayment service={selectedService} />
+      ) : (
+        <TransactionList />
+      )}
     </div>
   );
 }
