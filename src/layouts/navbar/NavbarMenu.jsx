@@ -22,7 +22,7 @@ export default function NavbarMenu({ ...props }) {
   ];
 
   return (
-    <NavigationMenu {...props} viewport={false}>
+    <NavigationMenu {...props}>
       <NavigationMenuList className='gap-6 space-x-0 px-4 data-[orientation=vertical]:flex-col data-[orientation=vertical]:items-start'>
         {menuItems.map((item) => {
           const isActive = currentPath === item.href;

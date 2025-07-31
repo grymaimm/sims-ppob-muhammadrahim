@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfile, fetchBalance } from '@/store/slices/userSlice';
+import Image from 'next/image';
 
 export default function ProfileSection() {
   const dispatch = useDispatch();
@@ -15,12 +16,15 @@ export default function ProfileSection() {
     <div className='flex w-full flex-col justify-between gap-6 p-6 md:flex-row'>
       {/* Profile Section */}
       <div className='flex flex-col'>
-        <img
-          src='/asset/Profile Photo.png'
-          alt='Profile Photo'
-          width={100}
-          height={100}
-        />
+        <div className='relative size-28 w-max rounded-full border'>
+          <Image
+            src={profile?.profile_image || '/asset/Profile Photo.png'}
+            alt='Profile Photo'
+            width={112}
+            height={112}
+            className='size-28 rounded-full object-cover'
+          />
+        </div>
         <span className='mt-4 text-xl'>Selamat datang,</span>
         <h3 className='text-3xl font-semibold'>
           {loading
