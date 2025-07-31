@@ -2,19 +2,36 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfile, fetchBalance } from '@/store/slices/userSlice';
 import Image from 'next/image';
+import { Skeleton } from '@/components/shadcnui/skeleton';
 
 export default function ProfileSection() {
   const dispatch = useDispatch();
-  const { profile, balance, loading } = useSelector((state) => state.user);
+  const { profile, balance, loading, error } = useSelector(
+    (state) => state.user,
+  );
 
   useEffect(() => {
     dispatch(fetchProfile());
     dispatch(fetchBalance());
   }, [dispatch]);
 
+  if (loading || error) {
+    return (
+      <div className='flex w-full flex-col justify-between gap-6 p-6 md:flex-row'>
+        <div className='flex flex-col'>
+          <Skeleton className='size-28 rounded-full' />
+          <div className='mt-4 space-y-2'>
+            <Skeleton className='h-4 w-[150px]' />
+            <Skeleton className='h-8 w-[200px]' />
+          </div>
+        </div>
+        <Skeleton className='h-[183px] w-full rounded-xl md:w-[670px]' />
+      </div>
+    );
+  }
+
   return (
     <div className='flex w-full flex-col justify-between gap-6 p-6 md:flex-row'>
-      {/* Profile Section */}
       <div className='flex flex-col'>
         <div className='relative size-28 w-max rounded-full border'>
           <Image
@@ -27,13 +44,10 @@ export default function ProfileSection() {
         </div>
         <span className='mt-4 text-xl'>Selamat datang,</span>
         <h3 className='text-3xl font-semibold'>
-          {loading
-            ? 'Loading...'
-            : profile?.first_name + ' ' + profile?.last_name}
+          {profile?.first_name} {profile?.last_name}
         </h3>
       </div>
 
-      {/* Saldo Section */}
       <div className='relative'>
         <img
           src='/asset/Background Saldo.png'
@@ -43,9 +57,7 @@ export default function ProfileSection() {
         <div className='absolute inset-0 flex flex-col justify-center gap-4 px-6 text-white'>
           <span className='text-xl'>Saldo anda</span>
           <h3 className='text-3xl font-bold'>
-            {loading
-              ? 'Loading...'
-              : `Rp. ${balance?.balance?.toLocaleString('id-ID')}`}
+            Rp. {balance?.balance?.toLocaleString('id-ID') || '0'}
           </h3>
           <span className='cursor-pointer text-xl underline'>Lihat saldo</span>
         </div>
