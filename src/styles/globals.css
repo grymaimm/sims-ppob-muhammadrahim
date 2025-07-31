@@ -73,3 +73,13 @@
 .NavigationMenuLink[data-active] {
   text-decoration: 'underline';
 }
+
+#nprogress .bar {
+  background: rgb(239 68 68) !important;
+  height: 3px !important;
+  z-index: 9999999 !important;
+}
+
+#nprogress .bar {
+  position: fixed !important;
+}
