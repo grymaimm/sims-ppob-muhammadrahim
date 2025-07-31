@@ -127,8 +127,10 @@ export default function AccountModels() {
             <Image
               src={
                 imagePreview ||
-                profile?.profile_image ||
-                '/asset/Profile Photo.png'
+                (!profile?.profile_image ||
+                profile.profile_image.includes('null')
+                  ? '/asset/Profile Photo.png'
+                  : profile.profile_image)
               }
               alt='Profile'
               width={96}
