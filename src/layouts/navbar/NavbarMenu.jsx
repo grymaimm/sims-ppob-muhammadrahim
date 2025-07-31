@@ -13,7 +13,6 @@ export default function NavbarMenu({ ...props }) {
   const router = useRouter();
   const currentPath = router.pathname;
 
-  // Daftar menu bisa dibuat sebagai array untuk perulangan juga
   const menuItems = [
     { href: '/home', label: 'Home' },
     { href: '/topup', label: 'Top Up' },
@@ -27,20 +26,18 @@ export default function NavbarMenu({ ...props }) {
         {menuItems.map((item) => {
           const isActive = currentPath === item.href;
           return (
-            <>
-              <NavigationMenuItem key={item.href}>
-                <NavigationMenuLink asChild active={isActive}>
-                  <Link
-                    href={item.href}
-                    className={`NavigationMenuLink transition-colors duration-200 ${
-                      isActive ? 'font-semibold text-red-500' : 'text-gray-700'
-                    }`}
-                  >
-                    {item.label}
-                  </Link>
-                </NavigationMenuLink>
-              </NavigationMenuItem>
-            </>
+            <NavigationMenuItem key={item.href}>
+              <NavigationMenuLink asChild active={isActive}>
+                <Link
+                  href={item.href}
+                  className={`NavigationMenuLink transition-colors duration-200 ${
+                    isActive ? 'font-semibold text-red-500' : 'text-gray-700'
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              </NavigationMenuLink>
+            </NavigationMenuItem>
           );
         })}
       </NavigationMenuList>
