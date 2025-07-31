@@ -1,6 +1,11 @@
-'use client';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { LiaMoneyCheckAltSolid } from 'react-icons/lia';
 
-import { Button } from '@/components/shadcnui/button';
 import {
   Form,
   FormControl,
@@ -10,66 +15,71 @@ import {
   FormMessage,
 } from '@/components/shadcnui/form';
 import { Input } from '@/components/shadcnui/input';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { LiaMoneyCheckAltSolid } from 'react-icons/lia';
-import { useDispatch, useSelector } from 'react-redux';
-import { useEffect } from 'react';
-import { toast } from 'sonner';
-import { postTopup } from '@/store/slices/topupSlice';
+import { Button } from '@/components/shadcnui/button';
 
-const FormSchema = z.object({
+import { fetchBalance } from '@/store/slices/userSlice';
+import { postTopup } from '@/store/slices/topupSlice';
+import { useRouter } from 'next/router';
+
+// Validation Schema
+const TopupSchema = z.object({
   top_up_amount: z
     .string()
     .min(1, { message: 'Nominal tidak boleh kosong' })
     .transform((val) => parseInt(val))
-    .refine((val) => val >= 10000, {
+    .refine((val) => val >= 10_000, {
       message: 'Minimum top up adalah Rp10.000',
     })
-    .refine((val) => val <= 1000000, {
+    .refine((val) => val <= 1_000_000, {
       message: 'Maksimum top up adalah Rp1.000.000',
     }),
 });
 
 export default function TopupForm() {
+  const router = useRouter();
   const dispatch = useDispatch();
   const { loading, data, error } = useSelector((state) => state.topup);
 
   const form = useForm({
-    resolver: zodResolver(FormSchema),
+    resolver: zodResolver(TopupSchema),
     defaultValues: {
       top_up_amount: '',
     },
     mode: 'onChange',
   });
 
-  const onSubmit = (data) => {
-    dispatch(postTopup(data));
+  const isSubmitDisabled =
+    !form.formState.isValid || !form.watch('top_up_amount');
+
+  const handleSubmit = (values) => {
+    dispatch(postTopup(values));
+  };
+
+  const handleQuickAmount = (amount) => {
+    form.setValue('top_up_amount', amount.toString(), {
+      shouldValidate: true,
+    });
   };
 
   useEffect(() => {
     if (data) {
-      toast('Topup berhasil!');
+      toast('Top up berhasil!');
       form.reset();
-      window.location.reload();
+      dispatch(fetchBalance());
+      router.push('/topup');
     }
+
     if (error) {
-      toast('Topup gagal: ' + error?.message || error);
+      toast('Top up gagal: ' + (error?.message || error));
     }
   }, [data, error]);
 
-  const isSubmitDisabled =
-    !form.formState.isValid || !form.watch('top_up_amount');
-  // Fungsi untuk handle quick button
-  const handleQuickAmount = (amount) => {
-    form.setValue('top_up_amount', amount.toString(), { shouldValidate: true });
-  };
   return (
     <div className='flex flex-col gap-4 md:flex-row'>
+      {/* Form Topup */}
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(handleSubmit)}
           className='w-full space-y-4'
         >
           <FormField
@@ -83,10 +93,10 @@ export default function TopupForm() {
                   </FormLabel>
                   <FormControl>
                     <Input
-                      type='number'
-                      className='pl-10'
-                      placeholder='0'
                       {...field}
+                      type='number'
+                      placeholder='0'
+                      className='pl-10'
                     />
                   </FormControl>
                 </div>
@@ -94,25 +104,27 @@ export default function TopupForm() {
               </FormItem>
             )}
           />
+
           <Button
             type='submit'
             className='w-full'
             variant='destructive'
-            disabled={isSubmitDisabled}
+            disabled={isSubmitDisabled || loading}
           >
-            Top Up
+            {loading ? 'Memproses...' : 'Top Up'}
           </Button>
         </form>
       </Form>
-      {/* Quick Buttons */}
+
+      {/* Quick Nominal Buttons */}
       <div className='grid grid-cols-3 grid-rows-2 gap-4'>
         {[10000, 20000, 50000, 100000, 250000, 500000].map((amount) => (
           <Button
-            type='button'
             key={amount}
+            type='button'
             variant='outline'
+            className='px-6'
             onClick={() => handleQuickAmount(amount)}
-            className='px-16'
           >
             Rp{amount.toLocaleString('id-ID')}
           </Button>
