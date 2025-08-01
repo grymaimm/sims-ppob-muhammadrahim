@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfile, fetchBalance } from '@/store/slices/userSlice';
 import Image from 'next/image';
@@ -6,6 +6,7 @@ import { Skeleton } from '@/components/shadcnui/skeleton';
 
 export default function ProfileSection() {
   const dispatch = useDispatch();
+  const [showBalance, setShowBalance] = useState(false);
   const { profile, balance, loading, error } = useSelector(
     (state) => state.user,
   );
@@ -14,6 +15,10 @@ export default function ProfileSection() {
     dispatch(fetchProfile());
     dispatch(fetchBalance());
   }, [dispatch]);
+
+  const handleToggleBalance = () => {
+    setShowBalance((prev) => !prev);
+  };
 
   if (loading || error) {
     return (
@@ -56,14 +61,21 @@ export default function ProfileSection() {
         <img
           src='/asset/Background Saldo.png'
           alt='Background Saldo'
-          className='h-full w-full rounded-xl object-cover'
+          className='h-32 w-full rounded-xl object-cover md:h-full'
         />
-        <div className='absolute inset-0 flex flex-col justify-center gap-4 px-6 text-white'>
-          <span className='text-xl'>Saldo anda</span>
-          <h3 className='text-3xl font-bold'>
-            Rp. {balance?.balance?.toLocaleString('id-ID') || '0'}
+        <div className='absolute inset-0 flex flex-col justify-center gap-2 px-6 text-white md:gap-4'>
+          <span className='text-md md:text-xl'>Saldo anda</span>
+          <h3 className='text-2xl font-bold md:text-3xl'>
+            {showBalance
+              ? `Rp. ${balance?.balance?.toLocaleString('id-ID') || '0'}`
+              : 'Rp. ******'}
           </h3>
-          <span className='cursor-pointer text-xl underline'>Lihat saldo</span>
+          <span
+            className='text-md cursor-pointer underline md:text-xl'
+            onClick={handleToggleBalance}
+          >
+            {showBalance ? 'Sembunyikan saldo' : 'Lihat saldo'}
+          </span>
         </div>
       </div>
     </div>
