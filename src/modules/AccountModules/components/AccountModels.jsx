@@ -116,8 +116,8 @@ export default function AccountModels() {
   };
 
   return (
-    <div className='w-full'>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-6 py-6'>
+    <div className='w-full px-6'>
+      <form onSubmit={handleSubmit} className='flex flex-col gap-4 py-6'>
         {/* FOTO PROFIL */}
         <div className='mb-6 flex flex-col items-center gap-4'>
           <label
